@@ -1,0 +1,18 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# Playwright / resultados
+test-results/
+playwright-report/
+blob-report/
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Entornos
+.env

@@ -1,0 +1,178 @@
+import { test, expect, Page } from '@playwright/test';
+
+test.setTimeout(120_000);
+
+// ====== CONFIG ======
+const URL  = 'https://fariabrothers.eworkorders.com/default.asp';
+const USER = 'GUADALUPEG';
+const PASS = 'GAYTAN909959';
+
+// Segun tu inspección: <td id="dm0m0i7tdT">Inventory</td>
+const INVENTORY_CELL_ID = '#dm0m0i7tdT';
+const PURCHASE_ORDERS_TEXT = 'Purchase Orders';
+
+// ====== HELPERS ======
+
+/** Busca un selector en cualquier frame y devuelve {frame, locator} cuando lo encuentra. */
+async function findInAnyFrame(page: Page, selector: string, timeoutMs = 15_000) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    for (const f of page.frames()) {
+      const loc = f.locator(selector).first();
+      try {
+        // visible
+        if (await loc.isVisible({ timeout: 150 }).catch(() => false)) {
+          return { frame: f, locator: loc };
+        }
+        // o al menos adjunto
+        const count = await loc.count().catch(() => 0);
+        if (count > 0) {
+          await loc.scrollIntoViewIfNeeded().catch(() => {});
+          if (await loc.isVisible({ timeout: 150 }).catch(() => false)) {
+            return { frame: f, locator: loc };
+          }
+        }
+      } catch {}
+    }
+    await page.waitForTimeout(150);
+  }
+  throw new Error(`No encontré el selector en ningún frame: ${selector}`);
+}
+
+/** Abre el menú Inventory aunque esté en otro frame y requiera hover. */
+async function openInventoryMenu(page: Page) {
+  const { frame, locator: inv } = await findInAnyFrame(page, INVENTORY_CELL_ID, 20_000);
+
+  await inv.scrollIntoViewIfNeeded().catch(() => {});
+  await inv.hover({ force: true }).catch(() => {});
+
+  // “mueve” el mouse un poco para disparar onmouseover antiguos
+  const box = await inv.boundingBox();
+  if (box) {
+    await frame.page().mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await frame.page().mouse.move(box.x + box.width / 2 + 2, box.y + box.height / 2 + 2);
+  }
+
+  // Inyecta mouseover por si hay handlers inline
+  await frame.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, cancelable: true }));
+  }, INVENTORY_CELL_ID);
+
+  await frame.waitForTimeout(300);
+}
+
+/** Click en “Purchase Orders” tras abrir el menú. Busca el enlace en todos los frames. */
+/** Click robusto en “Purchase Orders” con menús legacy (a o td con onclick). */
+async function clickPurchaseOrders(page: Page) {
+  const TEXT = /purchase\s*orders?/i; // tolerante a espacios/plural
+
+  // Mientras buscamos, mantenemos el hover sobre Inventory cada ~500ms
+  let keepHover = true;
+  const hoverKeeper = (async () => {
+    while (keepHover) {
+      try { await openInventoryMenu(page); } catch {}
+      await page.waitForTimeout(500);
+    }
+  })();
+
+  try {
+    const start = Date.now();
+    const timeoutMs = 12_000;
+
+    while (Date.now() - start < timeoutMs) {
+      // Recorre TODOS los frames y también la página raíz
+      const allFrames = [page.mainFrame(), ...page.frames()];
+
+      for (const f of allFrames) {
+        // 1) <a> con texto
+        const a = f.locator('a').filter({ hasText: TEXT }).first();
+        if (await a.isVisible().catch(() => false)) {
+          await a.scrollIntoViewIfNeeded().catch(() => {});
+          // trial por si hay overlay invisible
+          await a.click({ trial: true }).catch(() => {});
+          await a.click({ force: true });
+          // Espera a que cargue el listado (aparece iframe _ew con Order List)
+          await page.waitForLoadState('domcontentloaded').catch(() => {});
+          keepHover = false;
+          return;
+        }
+
+        // 2) <td> con texto (menú legacy con onclick)
+        const td = f.locator('td').filter({ hasText: TEXT }).first();
+        if (await td.isVisible().catch(() => false)) {
+          await td.scrollIntoViewIfNeeded().catch(() => {});
+          // Intenta click real
+          await td.click({ trial: true }).catch(() => {});
+          await td.click({ force: true }).catch(() => {});
+          // Además, dispara click() por JS por si depende de onclick inline
+          await f.evaluate((el) => (el as HTMLElement).click(), await td.elementHandle());
+          await page.waitForLoadState('domcontentloaded').catch(() => {});
+          keepHover = false;
+          return;
+        }
+      }
+
+      await page.waitForTimeout(200);
+    }
+
+    throw new Error('No encontré “Purchase Orders” ni como <a> ni como <td>.');
+  } finally {
+    keepHover = false;
+    await hoverKeeper; // cerramos el loop de hover
+  }
+}
+/** Atajo para el frame principal de eWorkOrders */
+const ewFrame = (page: Page) => page.frameLocator('iframe[name="_ew"]');
+
+// ====== TEST ======
+
+test('Inventory ► Purchase Orders ► Add ► llenar ► guardar', async ({ page }) => {
+  // 1) Login
+  await page.goto(URL);
+  await page.getByRole('textbox', { name: 'USER ID' }).fill(USER);
+  await page.getByRole('textbox', { name: 'PASSWORD' }).fill(PASS);
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('networkidle').catch(() => {});
+  await page.waitForTimeout(300);
+
+  // 2) Abrir menú Inventory (robusto)
+  await openInventoryMenu(page);
+  await openInventoryMenu(page); // segundo intento por si el primero no despliega
+
+  // Espera a que cargue el portal interno
+  await page.waitForLoadState('networkidle');
+
+  // 2) Acciones dentro del iframe principal
+  const ew = page.frameLocator('iframe[name="_ew"]');
+
+  await ew.getByText('Purchase Orders', { exact: true }).click();
+  await ew.getByRole('link', { name: 'Add', exact: true }).click();
+
+  await ew.locator('#ven_num').selectOption('10');
+  await ew.locator('#field3').selectOption('ORDERED');
+  await ew.locator('#field2').selectOption('DOLORES');
+
+  await ew.getByRole('cell', { name: 'Details' }).click();
+  await ew.getByRole('button', { name: 'Add Items' }).click();
+
+  // 3) Segundo iframe: AddItemManagement
+  const addItem = ew.frameLocator('iframe[name="AddItemManagement"]');
+  await addItem.locator('input[name="item_number_search"]').fill('H16');
+  await addItem.getByRole('button', { name: 'Get Results' }).click();
+
+  const purchaseItems = addItem.frameLocator('iframe[name="PurchaseOrderItems"]');
+  await purchaseItems.getByRole('cell', { name: /H16 HOSE CLAMP/i }).click();
+
+  await ew.getByRole('button', { name: 'Add Selected Items' }).click();
+  await ew.getByRole('button', { name: /^Close$/ }).click();
+
+  // 4) Tercer iframe: Orders
+  const orders = ew.frameLocator('iframe[name="Orders"]');
+  await orders.locator('input[name="n1_5"]').fill('1');
+
+  // 5) Guardar
+  await ew.getByRole('link', { name: 'Save' }).click();
+});

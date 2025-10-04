@@ -1,0 +1,241 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - iframe [ref=e3]:
+      - table [ref=f1e2]:
+        - rowgroup [ref=f1e3]:
+          - row "You are logged in as guadalupeg. Add a Work Order Open Work Orders" [ref=f1e4]:
+            - cell "You are logged in as guadalupeg." [ref=f1e5]:
+              - link "You are logged in as guadalupeg." [ref=f1e6] [cursor=pointer]:
+                - /url: https://fariabrothers.eworkorders.com
+                - img "You are logged in as guadalupeg." [ref=f1e7] [cursor=pointer]
+            - cell [ref=f1e8]:
+              - link [ref=f1e9] [cursor=pointer]:
+                - /url: https://fariabrothers.eworkorders.com
+                - img [ref=f1e10] [cursor=pointer]
+            - cell "Add a Work Order Open Work Orders" [ref=f1e11]:
+              - table [ref=f1e12]:
+                - rowgroup [ref=f1e13]:
+                  - row "Add a Work Order Open Work Orders" [ref=f1e14]:
+                    - cell [ref=f1e15]:
+                      - img [ref=f1e17]
+                    - cell "Add a Work Order" [ref=f1e18]:
+                      - img "Add a Work Order" [ref=f1e20]
+                    - cell "Open Work Orders" [ref=f1e21]:
+                      - img "Open Work Orders" [ref=f1e23]
+          - row "My Stuff Work Order Asset PM Employee Customer Spot Buy Inventory Document Signature Meter Reports Settings Contact Us What's New Logout" [ref=f1e24]:
+            - cell "My Stuff Work Order Asset PM Employee Customer Spot Buy Inventory Document Signature Meter Reports Settings Contact Us What's New Logout" [ref=f1e25]:
+              - table [ref=f1e27]:
+                - rowgroup [ref=f1e28]:
+                  - row "My Stuff Work Order Asset PM Employee Customer Spot Buy Inventory Document Signature Meter Reports Settings Contact Us What's New Logout" [ref=f1e29]:
+                    - cell "My Stuff" [ref=f1e30]:
+                      - table [ref=f1e31]:
+                        - rowgroup [ref=f1e32]:
+                          - row "My Stuff" [ref=f1e33]:
+                            - cell "My Stuff" [ref=f1e34]
+                    - cell "Work Order" [ref=f1e35]:
+                      - table [ref=f1e36]:
+                        - rowgroup [ref=f1e37]:
+                          - row "Work Order" [ref=f1e38]:
+                            - cell "Work Order" [ref=f1e39]:
+                              - generic [ref=f1e40]: Work Order
+                    - cell "Asset" [ref=f1e41]:
+                      - table [ref=f1e42]:
+                        - rowgroup [ref=f1e43]:
+                          - row "Asset" [ref=f1e44]:
+                            - cell "Asset" [ref=f1e45]:
+                              - generic [ref=f1e46]: Asset
+                    - cell "PM" [ref=f1e47]:
+                      - table [ref=f1e48]:
+                        - rowgroup [ref=f1e49]:
+                          - row "PM" [ref=f1e50]:
+                            - cell "PM" [ref=f1e51]
+                    - cell "Employee" [ref=f1e52]:
+                      - table [ref=f1e53]:
+                        - rowgroup [ref=f1e54]:
+                          - row "Employee" [ref=f1e55]:
+                            - cell "Employee" [ref=f1e56]
+                    - cell "Customer" [ref=f1e57]:
+                      - table [ref=f1e58]:
+                        - rowgroup [ref=f1e59]:
+                          - row "Customer" [ref=f1e60]:
+                            - cell "Customer" [ref=f1e61]
+                    - cell "Spot Buy" [ref=f1e62]:
+                      - table [ref=f1e63]:
+                        - rowgroup [ref=f1e64]:
+                          - row "Spot Buy" [ref=f1e65]:
+                            - cell "Spot Buy" [ref=f1e66]
+                    - cell "Inventory" [ref=f1e67]:
+                      - table [ref=f1e68]:
+                        - rowgroup [ref=f1e69]:
+                          - row "Inventory" [ref=f1e70]:
+                            - cell "Inventory" [ref=f1e71]
+                    - cell "Document" [ref=f1e72]:
+                      - table [ref=f1e73]:
+                        - rowgroup [ref=f1e74]:
+                          - row "Document" [ref=f1e75]:
+                            - cell "Document" [ref=f1e76]
+                    - cell "Signature" [ref=f1e77]:
+                      - table [ref=f1e78]:
+                        - rowgroup [ref=f1e79]:
+                          - row "Signature" [ref=f1e80]:
+                            - cell "Signature" [ref=f1e81]
+                    - cell "Meter" [ref=f1e82]:
+                      - table [ref=f1e83]:
+                        - rowgroup [ref=f1e84]:
+                          - row "Meter" [ref=f1e85]:
+                            - cell "Meter" [ref=f1e86]
+                    - cell "Reports" [ref=f1e87]:
+                      - table [ref=f1e88] [cursor=pointer]:
+                        - rowgroup [ref=f1e89] [cursor=pointer]:
+                          - row "Reports" [ref=f1e90] [cursor=pointer]:
+                            - cell "Reports" [ref=f1e91] [cursor=pointer]
+                    - cell "Settings" [ref=f1e92]:
+                      - table [ref=f1e93]:
+                        - rowgroup [ref=f1e94]:
+                          - row "Settings" [ref=f1e95]:
+                            - cell "Settings" [ref=f1e96]
+                    - cell "Contact Us" [ref=f1e97]:
+                      - table [ref=f1e98] [cursor=pointer]:
+                        - rowgroup [ref=f1e99] [cursor=pointer]:
+                          - row "Contact Us" [ref=f1e100] [cursor=pointer]:
+                            - cell "Contact Us" [ref=f1e101] [cursor=pointer]
+                    - cell "What's New" [ref=f1e102]:
+                      - table [ref=f1e103] [cursor=pointer]:
+                        - rowgroup [ref=f1e104] [cursor=pointer]:
+                          - row "What's New" [ref=f1e105] [cursor=pointer]:
+                            - cell "What's New" [ref=f1e106] [cursor=pointer]
+                    - cell "Logout" [ref=f1e107]:
+                      - table [ref=f1e108] [cursor=pointer]:
+                        - rowgroup [ref=f1e109] [cursor=pointer]:
+                          - row "Logout" [ref=f1e110] [cursor=pointer]:
+                            - cell "Logout" [ref=f1e111] [cursor=pointer]
+    - iframe [ref=e4]:
+      - generic [active] [ref=f2e1]:
+        - table:
+          - rowgroup:
+            - row "Welcome to eWorkOrders Help":
+              - cell "Welcome to eWorkOrders Help":
+                - table [ref=f2e3]:
+                  - rowgroup [ref=f2e4]:
+                    - row "Welcome to eWorkOrders Help" [ref=f2e5]:
+                      - cell "Welcome to eWorkOrders" [ref=f2e6]:
+                        - generic [ref=f2e8]: Welcome to eWorkOrders
+                      - cell "Help" [ref=f2e9]:
+                        - list [ref=f2e10]:
+                          - listitem [ref=f2e11]:
+                            - generic [ref=f2e14]: Help
+        - table [ref=f2e16]:
+          - rowgroup [ref=f2e17]:
+            - row "Management" [ref=f2e18]:
+              - cell "Management" [ref=f2e19]:
+                - table [ref=f2e20] [cursor=pointer]:
+                  - rowgroup [ref=f2e21] [cursor=pointer]:
+                    - row "Management" [ref=f2e22] [cursor=pointer]:
+                      - cell "Management" [ref=f2e23] [cursor=pointer]
+            - row "Purchase Orders" [ref=f2e24]:
+              - cell "Purchase Orders" [ref=f2e25]:
+                - table [ref=f2e26] [cursor=pointer]:
+                  - rowgroup [ref=f2e27] [cursor=pointer]:
+                    - row "Purchase Orders" [ref=f2e28] [cursor=pointer]:
+                      - cell "Purchase Orders" [ref=f2e29] [cursor=pointer]
+            - row "Purchase Returns" [ref=f2e30]:
+              - cell "Purchase Returns" [ref=f2e31]:
+                - table [ref=f2e32] [cursor=pointer]:
+                  - rowgroup [ref=f2e33] [cursor=pointer]:
+                    - row "Purchase Returns" [ref=f2e34] [cursor=pointer]:
+                      - cell "Purchase Returns" [ref=f2e35] [cursor=pointer]
+            - row "Inventory Orders" [ref=f2e36]:
+              - cell "Inventory Orders" [ref=f2e37]:
+                - table [ref=f2e38] [cursor=pointer]:
+                  - rowgroup [ref=f2e39] [cursor=pointer]:
+                    - row "Inventory Orders" [ref=f2e40] [cursor=pointer]:
+                      - cell "Inventory Orders" [ref=f2e41] [cursor=pointer]
+            - row "Inventory Returns" [ref=f2e42]:
+              - cell "Inventory Returns" [ref=f2e43]:
+                - table [ref=f2e44] [cursor=pointer]:
+                  - rowgroup [ref=f2e45] [cursor=pointer]:
+                    - row "Inventory Returns" [ref=f2e46] [cursor=pointer]:
+                      - cell "Inventory Returns" [ref=f2e47] [cursor=pointer]
+            - row "Transfer Orders" [ref=f2e48]:
+              - cell "Transfer Orders" [ref=f2e49]:
+                - table [ref=f2e50] [cursor=pointer]:
+                  - rowgroup [ref=f2e51] [cursor=pointer]:
+                    - row "Transfer Orders" [ref=f2e52] [cursor=pointer]:
+                      - cell "Transfer Orders" [ref=f2e53] [cursor=pointer]
+            - row "Counting Orders" [ref=f2e54]:
+              - cell "Counting Orders" [ref=f2e55]:
+                - table [ref=f2e56] [cursor=pointer]:
+                  - rowgroup [ref=f2e57] [cursor=pointer]:
+                    - row "Counting Orders" [ref=f2e58] [cursor=pointer]:
+                      - cell "Counting Orders" [ref=f2e59] [cursor=pointer]
+            - row "Supervisors" [ref=f2e60]:
+              - cell "Supervisors" [ref=f2e61]:
+                - table [ref=f2e62] [cursor=pointer]:
+                  - rowgroup [ref=f2e63] [cursor=pointer]:
+                    - row "Supervisors" [ref=f2e64] [cursor=pointer]:
+                      - cell "Supervisors" [ref=f2e65] [cursor=pointer]
+            - row "Stock Rooms" [ref=f2e66]:
+              - cell "Stock Rooms" [ref=f2e67]:
+                - table [ref=f2e68] [cursor=pointer]:
+                  - rowgroup [ref=f2e69] [cursor=pointer]:
+                    - row "Stock Rooms" [ref=f2e70] [cursor=pointer]:
+                      - cell "Stock Rooms" [ref=f2e71] [cursor=pointer]
+            - row "Inventory Requests" [ref=f2e72]:
+              - cell "Inventory Requests" [ref=f2e73]:
+                - table [ref=f2e74] [cursor=pointer]:
+                  - rowgroup [ref=f2e75] [cursor=pointer]:
+                    - row "Inventory Requests" [ref=f2e76] [cursor=pointer]:
+                      - cell "Inventory Requests" [ref=f2e77] [cursor=pointer]
+            - row "Vendors" [ref=f2e78]:
+              - cell "Vendors" [ref=f2e79]:
+                - table [ref=f2e80] [cursor=pointer]:
+                  - rowgroup [ref=f2e81] [cursor=pointer]:
+                    - row "Vendors" [ref=f2e82] [cursor=pointer]:
+                      - cell "Vendors" [ref=f2e83] [cursor=pointer]
+            - row "Contacts" [ref=f2e84]:
+              - cell "Contacts" [ref=f2e85]:
+                - table [ref=f2e86] [cursor=pointer]:
+                  - rowgroup [ref=f2e87] [cursor=pointer]:
+                    - row "Contacts" [ref=f2e88] [cursor=pointer]:
+                      - cell "Contacts" [ref=f2e89] [cursor=pointer]
+            - row "Item Categories" [ref=f2e90]:
+              - cell "Item Categories" [ref=f2e91]:
+                - table [ref=f2e92] [cursor=pointer]:
+                  - rowgroup [ref=f2e93] [cursor=pointer]:
+                    - row "Item Categories" [ref=f2e94] [cursor=pointer]:
+                      - cell "Item Categories" [ref=f2e95] [cursor=pointer]
+            - row "Item User Fields" [ref=f2e96]:
+              - cell "Item User Fields" [ref=f2e97]:
+                - table [ref=f2e98] [cursor=pointer]:
+                  - rowgroup [ref=f2e99] [cursor=pointer]:
+                    - row "Item User Fields" [ref=f2e100] [cursor=pointer]:
+                      - cell "Item User Fields" [ref=f2e101] [cursor=pointer]
+            - row "PO User Fields" [ref=f2e102]:
+              - cell "PO User Fields" [ref=f2e103]:
+                - table [ref=f2e104] [cursor=pointer]:
+                  - rowgroup [ref=f2e105] [cursor=pointer]:
+                    - row "PO User Fields" [ref=f2e106] [cursor=pointer]:
+                      - cell "PO User Fields" [ref=f2e107] [cursor=pointer]
+            - row "IO User Fields" [ref=f2e108]:
+              - cell "IO User Fields" [ref=f2e109]:
+                - table [ref=f2e110] [cursor=pointer]:
+                  - rowgroup [ref=f2e111] [cursor=pointer]:
+                    - row "IO User Fields" [ref=f2e112] [cursor=pointer]:
+                      - cell "IO User Fields" [ref=f2e113] [cursor=pointer]
+            - row "TO Item User Fields" [ref=f2e114]:
+              - cell "TO Item User Fields" [ref=f2e115]:
+                - table [ref=f2e116] [cursor=pointer]:
+                  - rowgroup [ref=f2e117] [cursor=pointer]:
+                    - row "TO Item User Fields" [ref=f2e118] [cursor=pointer]:
+                      - cell "TO Item User Fields" [ref=f2e119] [cursor=pointer]
+            - row "Vendor User Fields" [ref=f2e120]:
+              - cell "Vendor User Fields" [ref=f2e121]:
+                - table [ref=f2e122] [cursor=pointer]:
+                  - rowgroup [ref=f2e123] [cursor=pointer]:
+                    - row "Vendor User Fields" [ref=f2e124] [cursor=pointer]:
+                      - cell "Vendor User Fields" [ref=f2e125] [cursor=pointer]
+  - iframe
+```
