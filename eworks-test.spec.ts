@@ -31,7 +31,7 @@ async function findInAnyFrame(page: Page, selector: string, timeoutMs = 12_000) 
   throw new Error(`No encontré el selector en ningún frame: ${selector}`);
 }
 
-async function waitForPurchaseOrdersList(page: Page, timeoutMs = 20_000) {
+async function waitForPurchaseOrdersList(page: Page, timeoutMs = 12_000) {
   const ew = page.frameLocator('iframe[name="_ew"]');
   await ew.locator('text=Order List').first().waitFor({ state: 'visible', timeout: timeoutMs });
   await page.waitForLoadState('domcontentloaded').catch(() => {});
@@ -50,129 +50,203 @@ async function hasPurchaseOrdersList(page: Page, timeoutMs = 2_000) {
   }
 }
 
-async function findPurchaseOrdersCandidate(page: Page) {
-  for (const frame of [page.mainFrame(), ...page.frames()]) {
-    const loc = frame.locator('a, td').filter({ hasText: PO_TEXT_RX }).first();
-    const count = await loc.count().catch(() => 0);
-    if (!count) continue;
-    const visible = await loc.isVisible({ timeout: 80 }).catch(() => false);
-    if (!visible) continue;
-    const info = await loc.evaluate((el) => {
-      const tag = el.tagName.toLowerCase();
-      const anchor = el.closest('a') as HTMLAnchorElement | null;
-      let href: string | null = null;
-      if (anchor) {
-        const attrHref = anchor.getAttribute('href');
-        href = attrHref && attrHref.trim() !== '' ? attrHref : anchor.href ?? null;
-      }
-      if (tag === 'a' && !href) {
-        const self = el as HTMLAnchorElement;
-        const attrHref = self.getAttribute('href');
-        href = attrHref && attrHref.trim() !== '' ? attrHref : self.href ?? null;
-      }
-      return { tag, href };
-    }).catch(() => null);
-    if (!info) continue;
-    return { frame, locator: loc, href: info.href ?? null, tagName: info.tag };
-  }
-  return null;
-}
-
-async function openPurchaseOrders(page: Page) {
-  console.log('[Inventory] Iniciando flujo robusto para abrir Purchase Orders.');
+async function hoverInventory(
+  page: Page,
+  info: Awaited<ReturnType<typeof findInAnyFrame>>,
+  attempt: number,
+) {
   const hoverPoints: Array<[number, number]> = [
     [0.14, 0.64],
     [0.16, 0.62],
     [0.12, 0.66],
   ];
+
+  if (info.frame.isDetached()) {
+    throw new Error('El frame con Inventory se encuentra desmontado');
+  }
+
+  await info.locator.scrollIntoViewIfNeeded().catch(() => {});
+
+  for (const [fx, fy] of hoverPoints) {
+    console.log(
+      `[Inventory] Hover intento ${attempt} en coordenadas relativas (${fx.toFixed(2)}, ${fy.toFixed(2)}).`,
+    );
+
+    try {
+      const box = await info.locator.boundingBox();
+      if (box) {
+        const px = Math.max(2, Math.round(box.width * fx));
+        const py = Math.max(2, Math.round(box.height * fy));
+
+        try {
+          await info.locator.hover({ position: { x: px, y: py } });
+          console.log(`[Inventory] Hover ejecutado via locator.hover en punto (${px}, ${py}).`);
+        } catch (hoverError) {
+          console.log(
+            `[Inventory] locator.hover falló, intentando fallback mouse.move: ${
+              (hoverError as Error).message ?? hoverError
+            }`,
+          );
+          try {
+            await page.mouse.move(box.x + px, box.y + py);
+            console.log('[Inventory] page.mouse.move ejecutado como fallback.');
+          } catch (mouseError) {
+            console.log(
+              `[Inventory] Fallback mouse.move también falló: ${
+                (mouseError as Error).message ?? mouseError
+              }`,
+            );
+          }
+        }
+      } else {
+        await info.locator.hover();
+        console.log('[Inventory] Hover ejecutado sin boundingBox.');
+      }
+    } catch (error) {
+      console.log(`[Inventory] Error durante hover: ${(error as Error).message ?? error}`);
+    }
+
+    await page.waitForTimeout(50);
+  }
+}
+
+async function findPurchaseOrdersCandidate(page: Page) {
+  for (const frame of [page.mainFrame(), ...page.frames()]) {
+    const loc = frame.locator('a, td').filter({ hasText: PO_TEXT_RX }).first();
+    const count = await loc.count().catch(() => 0);
+    if (!count) continue;
+
+    const visible = await loc.isVisible({ timeout: 120 }).catch(() => false);
+    if (!visible) continue;
+
+    const info = await loc
+      .evaluate((el) => {
+        const tag = el.tagName.toLowerCase();
+        const anchor = (tag === 'a' ? el : el.closest('a')) as HTMLAnchorElement | null;
+        const href = anchor
+          ? anchor.getAttribute('href') || (anchor.href && anchor.href.trim() ? anchor.href : null)
+          : null;
+        return { tag, hasAnchor: !!anchor, href: href && href.trim() ? href : null };
+      })
+      .catch(() => null);
+
+    if (!info) continue;
+
+    return {
+      frame,
+      locator: loc,
+      isLink: info.hasAnchor,
+      href: info.href ?? undefined,
+      tagName: info.tag,
+    };
+  }
+
+  return null;
+}
+
+async function clickOrNavigate(
+  page: Page,
+  candidate: NonNullable<Awaited<ReturnType<typeof findPurchaseOrdersCandidate>>>,
+) {
+  console.log('[Inventory] Intentando click (trial) sobre el candidato.');
+  try {
+    await candidate.locator.click({ trial: true, timeout: 800 });
+    console.log('[Inventory] Trial exitoso, ejecutando click real.');
+    await candidate.locator.click({ timeout: 2_000 });
+    await page.waitForTimeout(150);
+
+    if (await hasPurchaseOrdersList(page, 1_500)) {
+      console.log('[Inventory] "Order List" visible tras el click.');
+      return true;
+    }
+
+    console.log('[Inventory] "Order List" no apareció en 1.5s después del click.');
+  } catch (error) {
+    console.log(`[Inventory] Error durante el click: ${(error as Error).message ?? error}`);
+  }
+
+  if (candidate.href) {
+    console.log(`[Inventory] Probando navegación manual via href: ${candidate.href}`);
+    try {
+      await page.goto(candidate.href, { waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(220);
+      if (await hasPurchaseOrdersList(page, 2_000)) {
+        console.log('[Inventory] "Order List" visible tras navegación manual.');
+        return true;
+      }
+      console.log('[Inventory] "Order List" no apareció tras navegación manual.');
+    } catch (error) {
+      console.log(`[Inventory] Error durante navegación manual: ${(error as Error).message ?? error}`);
+    }
+  }
+
+  return false;
+}
+
+async function openPurchaseOrders(page: Page) {
+  console.log('[Inventory] Iniciando flujo robusto para abrir Purchase Orders.');
   const deadline = Date.now() + 24_000;
-  let hoverAttempt = 0;
-  let hoverIndex = 0;
-  let nextHover = 0;
+  let attempt = 0;
   let inventoryInfo: Awaited<ReturnType<typeof findInAnyFrame>> | null = null;
 
   while (Date.now() < deadline) {
-    const now = Date.now();
-
-    if (now >= nextHover) {
-      hoverAttempt++;
-      if (!inventoryInfo) {
-        try {
-          inventoryInfo = await findInAnyFrame(page, INVENTORY_CELL_ID, 1_500);
-          console.log('[Inventory] Inventory localizado.');
-        } catch (error) {
-          inventoryInfo = null;
-          console.log(`[Inventory] No se pudo localizar Inventory en intento ${hoverAttempt}: ${(error as Error).message ?? error}`);
-        }
+    const attemptStart = Date.now();
+    attempt++;
+    const finishAttempt = async () => {
+      const remaining = 250 - (Date.now() - attemptStart);
+      if (remaining > 0) {
+        await page.waitForTimeout(remaining);
       }
+    };
 
-      if (inventoryInfo) {
-        const [fx, fy] = hoverPoints[hoverIndex % hoverPoints.length];
-        hoverIndex++;
-        console.log(`[Inventory] Hover intento ${hoverAttempt} en coordenadas relativas (${fx.toFixed(2)}, ${fy.toFixed(2)}).`);
-        try {
-          await inventoryInfo.locator.scrollIntoViewIfNeeded().catch(() => {});
-          const box = await inventoryInfo.locator.boundingBox();
-          if (box) {
-            const px = Math.max(4, Math.floor(box.width * fx));
-            const py = Math.max(4, Math.floor(box.height * fy));
-            await inventoryInfo.locator.hover({ position: { x: px, y: py }, force: true });
-            await page.mouse.move(box.x + px, box.y + py).catch(() => {});
-          } else {
-            await inventoryInfo.locator.hover({ force: true });
-          }
-          await inventoryInfo.frame.evaluate((sel) => {
-            const el = document.querySelector(sel);
-            if (el) el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
-          }, INVENTORY_CELL_ID).catch(() => {});
-        } catch (error) {
-          console.log(`[Inventory] Error al hacer hover: ${(error as Error).message ?? error}`);
-          inventoryInfo = null;
-        }
+    if (!inventoryInfo) {
+      try {
+        inventoryInfo = await findInAnyFrame(page, INVENTORY_CELL_ID, 1_500);
+        console.log('[Inventory] Inventory localizado.');
+      } catch (error) {
+        console.log(
+          `[Inventory] No se pudo localizar Inventory en intento ${attempt}: ${
+            (error as Error).message ?? error
+          }`,
+        );
+        await finishAttempt();
+        continue;
       }
-
-      nextHover = now + 250;
-      await page.waitForTimeout(140);
     }
+
+    try {
+      await hoverInventory(page, inventoryInfo, attempt);
+    } catch (error) {
+      console.log(`[Inventory] Hover falló, se reintentará: ${(error as Error).message ?? error}`);
+      inventoryInfo = null;
+      await finishAttempt();
+      continue;
+    }
+
+    await page.waitForTimeout(80);
 
     const candidate = await findPurchaseOrdersCandidate(page);
     if (candidate) {
-      console.log(`[Inventory] Candidato "Purchase Orders" visible (${candidate.tagName}).`);
       await candidate.locator.scrollIntoViewIfNeeded().catch(() => {});
-      await page.waitForTimeout(120);
+      await page.waitForTimeout(80);
+      const rawText = (await candidate.locator.innerText().catch(() => '')).trim();
+      console.log(
+        `[Inventory] Candidato "Purchase Orders" encontrado (${candidate.isLink ? 'link' : candidate.tagName}). Texto="${
+          rawText.slice(0, 80) || '<sin texto>'
+        }".`,
+      );
 
-      try {
-        await candidate.locator.click({ timeout: 2_000 });
-        console.log('[Inventory] Click directo sobre el candidato ejecutado.');
-      } catch (error) {
-        console.log(`[Inventory] Error en click directo: ${(error as Error).message ?? error}`);
-      }
-
-      await page.waitForTimeout(260);
-      if (await hasPurchaseOrdersList(page, 2_500)) {
-        console.log('[Inventory] "Order List" visible tras el click directo.');
-        return await waitForPurchaseOrdersList(page);
-      }
-
-      if (candidate.href) {
-        console.log(`[Inventory] Intentando navegación manual con href=${candidate.href}.`);
-        try {
-          await page.goto(candidate.href, { waitUntil: 'domcontentloaded' });
-        } catch (error) {
-          console.log(`[Inventory] Error usando page.goto: ${(error as Error).message ?? error}`);
-        }
-        await page.waitForTimeout(320);
-        if (await hasPurchaseOrdersList(page, 3_000)) {
-          console.log('[Inventory] "Order List" visible tras navegar manualmente.');
-          return await waitForPurchaseOrdersList(page);
-        }
+      const success = await clickOrNavigate(page, candidate);
+      if (success) {
+        console.log('[Inventory] Validando "Order List" final.');
+        return await waitForPurchaseOrdersList(page, 12_000);
       }
     }
 
-    await page.waitForTimeout(180);
+    await finishAttempt();
   }
 
-  throw new Error('No se pudo abrir Purchase Orders desde Inventory en 24 segundos.');
+  throw new Error('No se pudo abrir Purchase Orders desde Inventory en 24s');
 }
 
 // =============== TEST ===============
